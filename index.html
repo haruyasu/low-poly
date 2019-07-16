@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Elephant</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+        <style>
+            body {
+                margin: 0px;
+                padding: 0px;
+                overflow: hidden;
+            }
+
+            #world {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                background-image: linear-gradient(to top, #37ecba 0%, #72afd3 100%);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="world"></div>
+        <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r98/build/three.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r98/examples/js/controls/OrbitControls.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r98/examples/js/loaders/GLTFLoader.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r98/examples/js/WebGL.js"></script>
+        <script>
+            window.addEventListener("load", init, false);
+
+            function init(event) {
+                initScreenAnd3D();
+                createControls();
+                createLights();
+                createObj();
+                loop();
+            }
+
+            //COLORS
+            var Colors = {
+                red: 0xEA4335,
+                white: 0xd8d0d1,
+                pink: 0xf5986e,
+                brown: 0x59332e,
+                brownDark: 0x23190f,
+                blue: 0x68c3c0,
+                yellow: 0xFFE066,
+                black: 0x50514F
+            };
+
+            // Controls
+            function createControls() {
+                controls = new THREE.OrbitControls(camera, container);
+            }
+
+            //INIT THREE JS, SCREEN AND MOUSE EVENTS
+            function initScreenAnd3D() {
+                container = document.getElementById("world");
+                HEIGHT = container.offsetHeight;
+                WIDTH = container.width;
+                scene = new THREE.Scene();
+                // scene.fog = new THREE.Fog(0xd6eae6, 150, 300);
+                aspectRatio = WIDTH / HEIGHT;
+                fieldOfView = 60;
+                nearPlane = 1;
+                farPlane = 10000;
+                camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
+                // scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
+                camera.position.x = 4;
+                camera.position.z = 5;
+                camera.position.y = 2;
+                renderer = new THREE.WebGLRenderer({
+                    alpha: true,
+                    antialias: true
+                });
+                renderer.setSize(WIDTH, HEIGHT);
+                renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1);
+                renderer.shadowMap.enabled = true;
+                container.appendChild(renderer.domElement);
+                window.addEventListener("resize", handleWindowResize, false);
+                clock = new THREE.Clock();
+                handleWindowResize();
+            }
+            function handleWindowResize() {
+                HEIGHT = container.offsetHeight;
+                WIDTH = container.offsetWidth;
+                renderer.setSize(WIDTH, HEIGHT);
+                camera.aspect = WIDTH / HEIGHT;
+                camera.updateProjectionMatrix();
+            }
+            var ambientLight, hemisphereLight, shadowLight;
+
+            function createLights() {
+                // hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, 0.1);
+                hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000, 0.1);
+                // ambientLight = new THREE.AmbientLight(0xdc8874, 0.3);
+                ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+                shadowLight = new THREE.DirectionalLight(0xffffff, 0.9);
+                shadowLight.position.set(150, 350, 350);
+                shadowLight.castShadow = true;
+                shadowLight.shadow.camera.left = -400;
+                shadowLight.shadow.camera.right = 400;
+                shadowLight.shadow.camera.top = 400;
+                shadowLight.shadow.camera.bottom = -400;
+                shadowLight.shadow.camera.near = 1;
+                shadowLight.shadow.camera.far = 1000;
+                shadowLight.shadow.mapSize.width = 2048;
+                shadowLight.shadow.mapSize.height = 2048;
+                scene.add(hemisphereLight);
+                scene.add(shadowLight);
+                scene.add(ambientLight);
+            }
+
+            function createObj() {
+                var loader = new THREE.GLTFLoader();
+                // loader.load("donut.glb", function(gltf) {
+                loader.load("elephant.glb", function(gltf) {
+                    obj = gltf.scene.children[0];
+                    obj.position.y = -1.5;
+                    p_scale = 1.3;
+                    obj.scale.set(p_scale, p_scale, p_scale);
+                    scene.add(obj);
+                });
+            }
+
+            function loop() {
+                renderer.render(scene, camera);
+                requestAnimationFrame(loop);
+            }
+        </script>
+    </body>
+</html>
